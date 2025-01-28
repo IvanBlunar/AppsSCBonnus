@@ -5,6 +5,7 @@ function reenviarCorreos() {
 
   var query = 'from:webmaster@sanpablo.com.co is:unread'; // Busca correos no leídos del remitente específico
   var threads = GmailApp.search(query, 0, 20); // Limitamos a 20 hilos para evitar exceder los límites de velocidad
+  
 
   for (var i = 0; i < threads.length; i++) {
     var messages = threads[i].getMessages();
@@ -87,23 +88,15 @@ function crearHtmlCupon(cupon) {
 
 // Función para extraer la dirección de correo electrónico del cuerpo del mensaje
 function extraerEmail(body) {
-  var inicio = body.indexOf('Dirección de correo electrónico:') + 'Dirección de correo electrónico:'.length;
-  var fin = body.indexOf('\n', inicio);
-  var email = body.substring(inicio, fin).trim();
+  // Expresión regular para buscar direcciones de correo electrónico en el cuerpo del mensaje
+  var emailRegex = /[\w.-]+@[^\s]+/g;
   
-  // Verifica si la cadena de correo electrónico no está vacía
-  if (email) {
-    // Elimina caracteres no deseados al principio y al final del correo electrónico
-    email = email.replace(/^\*+|\*+$/g, '').trim();
-
-    // Validación más perisiva de formato de correo electrónico
-    var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (emailRegex.test(email)) {
-      return email;
-    } else {
-      Logger.log('Correo electrónico inválido: ' + email);
-      return null; // Retorna null si el correo no es válido
-    }
+  // Busca todas las coincidencias de direcciones de correo electrónico en el cuerpo del mensaje
+  var matches = body.match(emailRegex);
+  
+  // Si se encuentran direcciones de correo electrónico, devuelve la primera
+  if (matches && matches.length > 0) {
+    return matches[0];
   } else {
     Logger.log('No se encontró una dirección de correo electrónico en el cuerpo del mensaje.');
     return null;
